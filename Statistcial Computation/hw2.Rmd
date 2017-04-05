@@ -1,0 +1,239 @@
+---
+title: "Homework2"
+author: "Mengyu Huang"
+date: "October 26, 2015"
+output: html_document
+---
+1. In statistics, samples collected are often affected by
+*missing values*. For example, in a clinical trial it often
+happens that patients do not complete the trial because they may perhaps
+have to relocate to a different state, or similar, yielding a missing
+value in the data set. Still, for scientific and economic reasons the
+sample collected should in general be utilized even though one or a few
+observations are incomplete.  
+
+    There are several ways of addressing the problem of missing values. One
+is to delete the observation from the sample, and another is
+*imputation* of missing values. There are a number of
+common techniques for imputation of missing values, including imputation
+with a fixed value, such as zero, or imputation with the mean or median
+value. In `R`, missing values are often encoded by
+`NA`. *Hint*: Now is a good time to look up `NA` in `R`.
+    (a) Write a function that accepts a numeric array or data frame, and
+        returns the array or data frame with the observations (rows) that
+        have missing values, encoded by `NA`, deleted.  
+
+```{r}
+#1(a)
+delete_NA<-function(x){
+  del_num<-NULL
+  for(i in 1:dim(x)[1]){
+    if(complete.cases(x[i,])==FALSE){
+      del_num<-c(del_num,i)
+    }
+  }
+  x<-x[-del_num,]
+  return(x)
+}
+
+#generate test data
+library("datasets")
+data <- randu[1:40,]; data[(abs(data -0.4) < 0.05)] <- NA
+
+#show how function works
+delete_NA(data)
+```
+
+(b) Augment the function, by adding an argument, so that the function,
+        instead of deleting observations (rows) with missing values, can
+        perform imputation of the missing values with a fixed number, which
+        is specified through an additional argument with default value equal
+        to zero.
+
+```{r}
+#1(b)
+aug_NA<-function(x,augment=0){
+  newvec<-rep(augment,dim(x)[2])
+  for(i in 1:dim(x)[1]){
+    if(complete.cases(x[i,])==FALSE){
+      x[i,]<-newvec
+    }
+  }
+  return(x)
+}
+
+#generate test data
+library("datasets")
+data <- randu[1:40,]; data[(abs(data -0.4) < 0.05)] <- NA
+
+#show how function works
+aug_NA(data)
+aug_NA(data,1)
+```
+
+(c) Augment the function with another option: imputation of the missing
+        value with either the mean, median, or statistical mode of the
+        variable (column) of the missing value. 
+```{r}
+#1(c)
+#I write a function that enables you to choose to substitute the missing values with mean or median value.
+stat_aug_NA<-function(x,mod='mean'){
+  for(i in 1:dim(x)[1]){
+    if(complete.cases(x[i,])==FALSE){
+      for(j in 1:dim(x)[2]){
+        if(is.na(x[i,j]==TRUE)){
+          if(mod=='mean'){
+            newval<-mean(x[,j],na.rm = TRUE)
+          }else if(mod=='median'){
+            newval<-median(x[,j],na.rm = TRUE)
+          }
+          x[i,j]<-newval
+        }
+      }
+    }
+  }
+  return(x)
+}
+
+#generate test data
+library("datasets")
+data <- randu[1:40,]; data[(abs(data -0.4) < 0.05)] <- NA
+
+#show how function works
+stat_aug_NA(data)
+```
+
+2.This exercise is a continuation of Exercise 1. Augment your
+imputation function by adding the option of imputation of the missing
+value by the *nearest neighbor value*. The nearest neighbor
+value is the corresponding value of the observation that is most similar
+to the observation with the missing value. Evaluate similarity by the
+Euclidean distance, which is defined for two vectors
+$\vec{x}=(x_1,\dots,x_p)$ and $\vec{y} = (y_1,\dots,y_p)$ by
+$$d(\vec{x},\vec{y}) = \sqrt{\sum_{k=1}^p(x_k-y_k)^2}.$$
+That is, the most similar observation to $\vec{x}$ is the
+observation that has the smallest Euclidean distance relative to
+$\vec{x}$; its nearest neighbor.  
+
+```{r}
+#function code added the option of imputation by the *nearest neighbor value*.
+nearest_aug_NA<-function(x,mod='mean'){
+  for(i in 1:dim(x)[1]){
+    if(complete.cases(x[i,])==FALSE){
+      #to judge if the mode equals to 'nearst neighbor value'. If not, then the function is just the same as 1(c)
+      if(mod!='nearest neighbor value'){
+        for(j in 1:dim(x)[2]){
+          if(is.na(x[i,j]==TRUE)){
+            if(mod=='mean'){
+              newval<-mean(x[,j],na.rm = TRUE)
+            }else if(mod=='median'){
+              newval<-median(x[,j],na.rm = TRUE)
+            }
+            x[i,j]<-newval
+          }
+        }
+      }else{
+        #If we choose to substitute the missing value with the *nearest neighbor value*
+        distance=NULL
+        #try to use the formula to calculate the distance
+        for(k in 1:dim(x)[1]){
+          sum=0
+          for(j in 1:dim(x)[2]){
+            if(!is.na(x[i,j])){
+              sum<-sum+(x[k,j]-x[i,j])^2
+            }
+          }
+          distance<-c(distance,sqrt(sum))
+        }
+        #delete the distance if this row has missing value, because it's meaningless to include the rows that have missing values.
+        for(l in 1:dim(x)[1]){
+          if(!complete.cases(x[l,])){
+            distance[l]<-NA
+          }
+        }
+        #try to find out which row has the smallest Euclidean distance relative to the seleted row
+        n<-which.min(distance)
+        x[i,]<-x[n,]
+       }
+    }
+  }
+  return(x)
+}
+
+#generate test data
+library("datasets")
+data <- randu[1:40,]; data[(abs(data -0.4) < 0.05)] <- NA
+
+#try the new mode(imputation of missing value by the *nearest neighbor value*)
+nearest_aug_NA(data,'nearest neighbor value')
+```
+
+3.Write a function that accepts an object of type `ordered factor`, and returns its median
+level. Further, augment the function by adding the option of returning
+the statistical mode of the factor. 
+```{r}
+#basic function
+median_level<-function(x){
+  if(length(levels(x))%%2){
+    n<-levels(x)[ceiling(length(levels(x))/2)]
+  }else{
+    n<-c(levels(x)[length(levels(x))/2],levels(x)[length(levels(x))/2+1])
+  }
+  return(n)
+}
+#for those ordered factors whose level length are even numbers, we return both two levels in the medium.
+
+#test the function
+mons=c("Mar","Apr","Jan","Nov","Jan","Sep","Oct","Sep","Nov","Aug","Jan","Nov","Nov","Feb","May","Aug","Jul","Dec","Aug","Aug","Sep","Nov","Feb","Apr","Jun")
+mons=factor(mons,levels=c("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",ordered=TRUE))
+mons=ordered(mons)
+median_level(mons)
+
+fert = c(10,20,20,50,10,20,10,50,20)
+fert = factor(fert,levels=c(10,20,50),ordered=TRUE)
+median_level(fert)
+
+#further augment of the basic function
+stat_factor<-function(x,mod){
+  if(mod=='median'){
+    if(length(levels(x))%%2){
+      n<-levels(x)[ceiling(length(levels(x))/2)]
+    }else{
+      n<-c(levels(x)[length(levels(x))/2],levels(x)[length(levels(x))/2+1])
+    }
+  }else if(mod=='mode'){
+    n<-which.max(table(x))
+  }
+  return(n)
+}
+
+#test the function(try to get the statistical mode)
+fert
+stat_factor(fert,'mode')
+```
+
+4.
+    (a) Suppose that the variable `w` has been assigned to
+    represent an `R list`. Explain what the difference is
+    between using (single) brackets, `w[1]`, and using double
+    brackets, `w[[1]]`.  
+    
+A: For lists, we always use [[]] to select a single element we want. we can reference a list member directly. And if we use [], it returns a list of the selected elements, a list slice.
+
+The [[]] form allows only a single element to be selected using integer or character indices, but with [] we can use an index vector to retrieve a slice with multiple members. 
+
+For example:
+```{r}
+n=c(2,3,5)
+s=c("aa","bb","cc","dd","ee")
+b=c(TRUE,FALSE,TRUE,TRUE)
+x=list(n,s,b,3)
+x[[2]]
+x[2]
+```
+
+    
+    (b) Explain what the similarities and differences are between an `R
+    data.frame` and an `R list`.
+    
+A: Data frames and List are similiar. The main difference is dataframe has more restrictions than list, the first is all elements of a dataframe are vectors,and another one is all elements of a dataframe have an equal length. This makes dataframe is always a two-dimensional structure which enables you to select rows and do operations on rows easier.

@@ -1,0 +1,46 @@
+---
+title: "HW1"
+author: "mh3658"
+date: "March 30, 2017"
+output: html_document
+---
+
+Volatility estimation
+
+1. data downloading & calculate log return
+```{r, warning=FALSE}
+library(quantmod)
+library(fGarch)
+
+
+getSymbols("^GSPC", from="2007-01-01",to="2017-01-01")
+
+spxret=diff(log(GSPC[,6]))
+spxret =spxret[2:length(spxret),]
+```
+
+calculate rolling volatility (window length = 20)
+
+```{r}
+his_vol<-NULL
+for (i in 0:(length(spxret)-20)){
+  windata <- spxret[(i+1):(i+20)]
+  his_vol<-c(his_vol, sqrt(252)*sd(windata))
+}
+
+head(his_vol)
+
+plot(his_vol, type="o",pch=c(20))
+
+```
+
+fitting GARCH model
+
+```{r}
+
+model<- garchFit(formula=~garch(1,1),data = spxret,trace = F)
+model
+garch_vol <- model@sigma.t*sqrt(252)
+head(garch_vol)
+plot(garch_vol, type="o",pch=c(20))
+```

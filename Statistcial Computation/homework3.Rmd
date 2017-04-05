@@ -1,0 +1,90 @@
+---
+title: "<center>Homework 3</center>"
+author: "<center>Input and Output</center>"
+output: pdf_document
+---
+
+You are required to write a *markdown document* containing text, code, and at least one example. Thus you must create an Rmd file, that RStudio can convert to html. 
+
+When writing `R` functions for this set of exercises, you may utilize any `R`
+functions of your choice, except ones that perform identical or nearly
+identical tasks relative to the functions detailed in the exercises.
+
+1. Write an `R` function that accepts three arguments: characters input,
+output, and an integer $n$, and then performs the following.  The function
+reads the text file input, for example using the function `scan`,
+identifies which words the text file contains, counts the number of times
+each word occurs in the text, sorts the words according to their counts,
+and puts the sorted words and their corresponding counts into a data frame
+which is then written to the file `output`. The integer $n$ is an optional
+argument that limits the output to the $n$ most common words.
+
+    *Remark*: For testing purposes, you may use the file
+    `HW3Supplement_const.txt` available on the CCLE webpage, which
+    is a text file containing The Constitution of the United States.
+
+2. The text file `usaircarrierRPM0374-0714.txt`, available on the CCLE webpage, contains
+the monthly Revenue Passenger Miles (RPM), as reported by the U.S. air carriers to the Bureau of
+Transportation Statistics, between March 1974 and July 2014.
+Because the monthly RPM numbers exhibit seasonal fluctuations that easily could veil potential
+changes in the underlying demand, and obscure the general market development, it is common to
+smoothen such monthly fluctuations by applying a 12-month moving average filter. For each month,
+the 12-month moving average filter is simply the average of the 12 months including and preceding
+that month.
+    (a) Write `R` code that reads the text file containing the RPM series, and produces the corresponding series of the 12-month moving averages of the RPM series.
+    (b) Write code that, based on the moving average series, computes the average yearly growth during, respectively, the 70’s, 80’s, 90’s, 00’s and 10’s.  
+
+    *hint*: Using the class `Date` may be practical.
+
+3. Using the data of Exercise 2, write `R` code that produces a plot of the moving average series
+overlaid on top of the original RPM series. Ideally, the plot should have a title, axis labels, and
+a legend. For an accurate representation, make sure that the "y-axis" is scaled so that the number
+zero is included. For reference, you make look at the file `HW3Supplement_RPMplot.pdf` on
+the CCLE webpage.
+
+4. Consider the following. If we in a new session write in the `R` console:
+    ```{r}
+    my_fun <- function(){
+      my_object <- 0
+      print(find("my_object"))
+    }
+```
+and call `my_fun()`, then `R` will print the  
+```
+    character()
+```
+If we on the other hand in a new session write in the `R` console, and note the subtle difference:  
+    ```{r}
+    my_fun <- function(){
+      my_object <<- 0
+      print(find("my_object"))
+    }
+```
+and call `my_fun()`, then `R` will print the following.  
+```
+[1] ".GlobalEnv"
+```
+Complete the following Parts:  
+        (a) Explain, as precisely as you can, why the above described phenomenon occurs, and what the respective print-outs mean.  
+        (b) We have mentioned that the line of code `my_object <- 0` is a short form of the function call `assign("my_object",0)`. The line of code `my_object <<- 0`, written above, is also short for a call of the `assign` function, but which call?  
+        (c) While it is in general strongly discouraged, it is possible to reference an object created in an `R` session from within the body of a function, without passing the object as an argument. Explain how this can be done.  
+
+Submit
+------------------------------------------------
+Upload your homework before the end of the due date via the *Homework* page
+on the class CCLE. Submit only the Rmd file, but make sure RStudio knits it
+correctly to html.
+The `R` code
+must be clearly readable and properly commented. Explain your solutions
+well.
+
+
+
+Cooperation
+------------------------------------------------
+A limited amount of cooperation on the homework is allowed, but everybody
+hands in their own document. If you have cooperated in a group, indicate
+this in your document and mention the names of the other students in the
+group. Groups of more than four students are not allowed. Everybody in a
+group will get the same grade, even if the individual documents are
+different.
