@@ -1,29 +1,27 @@
+---
+title: "Modelling and pricing weather derivatives (NY)"
+author: "Mengyu Huang"
+date: "April 14, 2017"
+output: html_document
+---
 
+First part Modelling for New York temperature
+1. Read in the data
+
+```{r}
 setwd("C:/programming projects-for github/R projects/Temperature Modelling and Weather Derivatives Pricing")
 
 ny <- read.csv("nyc_daily_2001_2016.csv")
-# peru <- read.csv("Peru.csv")
-# drops <-c("X")
-# peru <-peru[, !(names(peru) %in% drops)]
 colnames(ny)[1]<-"date"
 
-head(ny)
-# head(peru)
 
 ny$date<-as.Date(ny$date,"%m/%d/%Y")
-# peru$date<-as.Date(peru$date,"%m/%d/%Y")
 
 nytemp<-as.numeric(as.character(ny$avg))
-# perutemp<-as.numeric(as.character(peru$avg))
 
 t<-ny$date
 
-
-
-# for ny
-##reference:http://stats.stackexchange.com/questions/60994/fit-a-sinusoidal-term-to-data
-# which(is.na(nytemp))
-
+# linear interpolation for NA values
 nytemp[4046] = nytemp[4045]+(nytemp[4048]-nytemp[4045])/3
 nytemp[4047] = nytemp[4045]+(nytemp[4048]-nytemp[4045])*2/3
 
@@ -35,6 +33,13 @@ per <- 1/ssp$freq[ssp$spec==max(ssp$spec)]
 # plot to check the difference
 rg <- diff(range(nytemp, na.rm = TRUE), na.rm=TRUE)
 plot(nytemp~t,ylim=c(min(nytemp,na.rm=TRUE)-0.1*rg,max(nytemp,na.rm=TRUE)+0.1*rg),cex=0.5)
+
+
+```
+
+2. run linear/ non-linear fitting
+
+```{r}
 
 # including the trend term t
 # fit linear model
@@ -48,9 +53,8 @@ t_mean<-function(t){
 }
 
 fitmean <- t_mean(dates)
+plot(nytemp~t,ylim=c(min(nytemp,na.rm=TRUE)-0.1*rg,max(nytemp,na.rm=TRUE)+0.1*rg),cex=0.5)
 lines(fitmean~t,col='red',lwd=4)    # solid red line is periodic with second harmonic
-
-
 
 
 # fit non-linear model
@@ -68,23 +72,22 @@ fitmean2 <- t_mean2(dates)
 lines(fitmean2~t,col='blue',lwd=4)  
 
 
-# sigma
-sigma1=sd(diff(nytemp)) #using difference of y, the one on the paper
-# sigma2=sd(nytemp-fitmean) #approximate residual standard error
+```
 
+3. Run Monte Carlo simulation
 
-
-
+```{r}
 ## RUN SIMULATION !!!
-tem0 = 25.40
-v = sigma1
+v = sd(diff(nytemp)) 
 
 # number of simulation paths
 N = 1000
 
+# change the simulation period you want
+
 orit = as.Date("2001-01-01",format="%Y-%m-%d")
-startt = as.Date("2016-08-01",format="%Y-%m-%d")
-finalt = as.Date("2016-08-31",format="%Y-%m-%d")
+startt = as.Date("2016-03-01",format="%Y-%m-%d")
+finalt = as.Date("2016-03-31",format="%Y-%m-%d")
 # set the step to be 1
 dt = 1
 time1 = as.numeric(startt-orit)+1
@@ -118,7 +121,7 @@ finalHDD <- rowMeans(df[time2-time1+2,])
 # seasonal CDD May to Sep
 finalCDD<- rowMeans(df[time2-time1+3,])
 
+as.numeric(finalHDD)
+as.numeric(finalCDD)
 
-# the prediction line
-lines(finalsim~seq(from=startt,to=finalt,by='days'),col='black',lwd=4) 
-
+```

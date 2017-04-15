@@ -1,4 +1,4 @@
-setwd('D:/Columbia 17spring/stoch in fin/proj')
+setwd('C:/programming projects-for github/R projects/Temperature Modelling and Weather Derivatives Pricing')
 #data <- read.csv("nyc_daily_2001_2016.csv")
 
 data<-read.csv("Peru.csv")
@@ -65,7 +65,7 @@ per <- 1/ssp$freq[ssp$spec==max(ssp$spec)]
 # to seperately model for El Nino part
 rg <- diff(range(y2))
 plot(y2~date2,ylim=c(min(y2)-0.1*rg,max(y2)+0.1*rg),cex=0.5)
-lines(fitted(reslm3)~date2,col=4,lty=10,lwd=4)   # dashed blue line is sin fit
+#lines(fitted(reslm3)~date2,col=4,lty=10,lwd=4)   # dashed blue line is sin fit
 
 
 # linear fit
